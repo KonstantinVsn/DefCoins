@@ -43,10 +43,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BalanceCity.cs" />
-    <Compile Include="City.cs" />
+    <Compile Include="Coin.cs" />
     <Compile Include="Country.cs" />
-    <Compile Include="Definer.cs" />
     <Compile Include="CityMap.cs" />
+    <Compile Include="City.cs" />
+    <Compile Include="Definer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

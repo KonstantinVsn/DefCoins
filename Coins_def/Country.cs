@@ -8,13 +8,19 @@ namespace Coins_def
 {
     public class Country
     {
-        public Country(string _name, int _balance)
+        public Country(string name, int xl, int  yl, int xh, int yh)
         {
-            this.balance = _balance;
-            this.name = _name;
+            this.name = name;
+            this.xl = xl;
+            this.yl = yl;
+            this.xh = xh;
+            this.yh = yh;
         }
-        public int balance { get; set; }
         public string name { get; set; }
-        public bool check { get; set; }
+        public int xl { get; set; }
+        public int yl { get; set; }
+        public int xh { get; set; }
+        public int yh { get; set; }
+        public int testcase { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace Coins_def
     {
         static void Main(string[] args)
         {
-            var path = @"D:\\5 курс\\Coins_def\\Coins_def\\input.txt";
+            var path = @"input.txt";
 
             string[] lines = System.IO.File.ReadAllLines(path);
             Definer definer = new Definer(lines);
