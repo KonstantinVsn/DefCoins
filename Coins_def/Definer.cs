@@ -12,6 +12,7 @@ namespace Coins_def
         int testcase = 0;
         Map map = new Map();
         int mapsize = 10;
+        List<City> citycase = new List<City>();
         int PORTION = 1000;
         int COINS_COUNT = 1000000;
         public Definer(string[] inputData)
@@ -37,7 +38,7 @@ namespace Coins_def
             for (var i = 0; i < testcase; i++)
             {
                 ResetMap();
-                var citycase = new List<City>();
+                
                 foreach (var city in cities)
                 {
                     if (city.testcase == i + 1)
@@ -52,55 +53,95 @@ namespace Coins_def
         }
         public void ShareCoins()
         {
-            for (int j = 0; j < mapsize; j++)
+            var resolve = false;
+            var day = 0;
+            while (!resolve)
             {
-                for (int i = 0; i < mapsize; i++)
+                day++;
+                Console.WriteLine(day);
+                for (int j = 0; j < mapsize; j++)
                 {
-                    List<Country> share_balance_of_city = new List<Country>();
-                    if (map[j][i] != null)
+                    for (int i = 0; i < mapsize; i++)
                     {
-                        foreach (var country in map[j][i].countries)
+                        List<Country> share_balance_of_city = new List<Country>();
+                        if (map[j][i] != null)
                         {
-                            Country _country = new Country(country.name, country.balance / PORTION);
-                            share_balance_of_city.Add(_country);
-                        }
+                            foreach (var country in map[j][i].countries)
+                            {
+                                Country _country = new Country(country.name, country.balance / PORTION);
+                                share_balance_of_city.Add(_country);
+                            }
 
-                        var cit = map[j][i];
-                        //ищем сверху 
-                        if (j - 1 >= 0 && map[j - 1][i] != null)
-                        {
-                            var y = j - 1;
-                            map[y][i].countries = AddBalance(map[y][i].countries, share_balance_of_city);
-                            map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
-                        }
-                        //ищем справа
-                        if (i + 1 >= 0 && map[j][i + 1] != null)
-                        {
-                            var x = i + 1;
-                            map[j][x].countries = AddBalance(map[j][x].countries, share_balance_of_city);
-                            map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
-                        }
+                            var cit = map[j][i];
+                            //ищем сверху 
+                            if (j - 1 >= 0 && map[j - 1][i] != null)
+                            {
+                                var y = j - 1;
+                                map[y][i].countries = AddBalance(map[y][i].countries, share_balance_of_city);
+                                map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
+                            }
+                            //ищем справа
+                            if (i + 1 >= 0 && map[j][i + 1] != null)
+                            {
+                                var x = i + 1;
+                                map[j][x].countries = AddBalance(map[j][x].countries, share_balance_of_city);
+                                map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
+                            }
 
-                        //ищем снизу
-                        if (j + 1 >= 0 && map[j + 1][i] != null)
-                        {
-                            var y = j + 1;
-                            map[y][i].countries = AddBalance(map[y][i].countries, share_balance_of_city);
-                            map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
-                        }
+                            //ищем снизу
+                            if (j + 1 >= 0 && map[j + 1][i] != null)
+                            {
+                                var y = j + 1;
+                                map[y][i].countries = AddBalance(map[y][i].countries, share_balance_of_city);
+                                map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
+                            }
 
-                        //ищем слева
-                        if (i - 1 >= 0 && map[j][i - 1] != null)
-                        {
-                            var x = i - 1;
-                            map[j][x].countries = AddBalance(map[j][x].countries, share_balance_of_city);
-                            map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
-                        }
+                            //ищем слева
+                            if (i - 1 >= 0 && map[j][i - 1] != null)
+                            {
+                                var x = i - 1;
+                                map[j][x].countries = AddBalance(map[j][x].countries, share_balance_of_city);
+                                map[j][i].countries = SubBalance(map[j][i].countries, share_balance_of_city);
+                            }
 
+                        }
                     }
+
+                }   
+
+                var country_for_check = new List<Country>();
+
+                foreach (var country in citycase)
+                {
+                    Country _country = new Country(country.name, 0);
+                    country_for_check.Add(_country);
                 }
 
+                //check
+                for (int j = 0; j < mapsize; j++)
+                {
+                    for (int i = 0; i < mapsize; i++)
+                    {
+                        if (map[j][i] != null)
+                        {
+                            foreach (var country in map[j][i].countries)
+                            {
+                                if (country != null && country.balance == 0)
+                                {
+                                   foreach(var countrycheck in country_for_check)
+                                    {
+                                        if(countrycheck.name == country.name)
+                                        {
+                                            countrycheck.check = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
+            Console.WriteLine(day);
         }
 
 
@@ -198,7 +239,6 @@ namespace Coins_def
                 }
                 PrittyPrint();
             }
-            Console.ReadKey();
         }
 
         public void PrittyPrint()

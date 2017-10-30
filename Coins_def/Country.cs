@@ -15,5 +15,6 @@ namespace Coins_def
         }
         public int balance { get; set; }
         public string name { get; set; }
+        public bool check { get; set; }
     }
 }
