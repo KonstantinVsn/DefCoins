@@ -113,7 +113,7 @@ namespace Coins_def
 
                 foreach (var country in countrycase)
                 {
-                    Country _country = new Country(country.name, 0);
+                    Country _country = new Country(country.name);
                     country_for_check.Add(_country);
                 }
 
@@ -124,13 +124,13 @@ namespace Coins_def
                     {
                         if (map[j][i] != null)
                         {
-                            foreach (var country in map[j][i].countries)
+                            foreach (var coin in map[j][i].coins)
                             {
-                                if (country != null && country.balance == 0)
+                                if (coin != null && coin.balance == 0)
                                 {
                                    foreach(var countrycheck in country_for_check)
                                     {
-                                        if(countrycheck.name == country.name)
+                                        if(countrycheck.name == coin.name)
                                         {
                                             countrycheck.check = false;
                                         }

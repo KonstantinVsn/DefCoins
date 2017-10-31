@@ -16,6 +16,10 @@ namespace Coins_def
             this.xh = xh;
             this.yh = yh;
         }
+        public Country(string name)
+        {
+            this.name = name;
+        }
         public string name { get; set; }
         public int xl { get; set; }
         public int yl { get; set; }
