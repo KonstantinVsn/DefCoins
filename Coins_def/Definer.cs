@@ -125,7 +125,7 @@ namespace Coins_def
                 Console.WriteLine(country.name + " days = " + country.days);
             }
            
-            Console.ReadKey();
+           
             day = 0;
         }
 

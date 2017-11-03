@@ -14,6 +14,7 @@ namespace Coins_def
 
             string[] lines = System.IO.File.ReadAllLines(path);
             Definer definer = new Definer(lines);
+            Console.ReadKey();
         }
     }
 }
