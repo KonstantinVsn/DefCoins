@@ -9,10 +9,11 @@ namespace Coins_def
     class Definer
     {
         public List<Country> countries = new List<Country>();
+        public List<Country> resolvedCountries = new List<Country>();
         int testcase = 0;
         Map map = new Map();
         int mapsize = 10;
-        List<Country> countrycase = new List<Country>();
+
         int PORTION = 1000;
         int COINS_COUNT = 1000000;
         public Definer(string[] inputData)
@@ -38,7 +39,7 @@ namespace Coins_def
             for (var i = 0; i < testcase; i++)
             {
                 ResetMap();
-                
+                List<Country> countrycase = new List<Country>();
                 foreach (var country in countries)
                 {
                     if (country.testcase == i + 1)
@@ -47,136 +48,141 @@ namespace Coins_def
                     }
                 }
                 FillMap(countrycase);
-                ShareCoins();
-                Console.Write("================================================================\n");
+                if (countrycase.Count > 1)
+                    ShareCoins(countrycase);
+                else
+                {
+                    Console.WriteLine("days = " + 0);
+                }
+                Console.Write("\n================================================================\n");
             }
         }
 
 
-        public void ShareCoins()
+        public void ShareCoins(List<Country> cs)
         {
             var resolve = false;
             var day = 0;
             while (!resolve)
             {
-                day++;
                 for (int j = 0; j < mapsize; j++)
                 {
                     for (int i = 0; i < mapsize; i++)
                     {
-                        //List<Coins> share_balance_of_city = new List<City>();
                         if (map[j][i] != null)
                         {
-                            /*foreach (var country in map[j][i].coins)
-                            {
-                                Country _country = new Country(country.name, country.balance / PORTION);
-                                share_balance_of_city.Add(_country);
-                            }*/
-
+                            var citycoins = map[j][i].coins;
+                            var target = new List<Coin>();
                             //ищем сверху 
                             if (j - 1 >= 0 && map[j - 1][i] != null)
                             {
-                                var y = j - 1;
-                                map[y][i].coins = AddBalance(map[y][i].coins, map[y][i].coins);
-                                map[j][i].coins = SubBalance(map[j][i].coins, map[y][i].coins);
+                                target = Transaction(map[j][i].coins, map[j - 1][i].coins);
                             }
                             //ищем справа
                             if (i + 1 >= 0 && map[j][i + 1] != null)
                             {
-                                var x = i + 1;
-                                map[j][x].coins = AddBalance(map[j][x].coins, map[y][i].coins);
-                                map[j][i].coins = SubBalance(map[j][i].coins, map[y][i].coins);
+                                target = Transaction(map[j][i].coins, map[j][i + 1].coins);
                             }
 
                             //ищем снизу
                             if (j + 1 >= 0 && map[j + 1][i] != null)
                             {
-                                var y = j + 1;
-                                map[y][i].coins = AddBalance(map[y][i].coins, map[y][i].coins);
-                                map[j][i].coins = SubBalance(map[j][i].coins, map[y][i].coins);
+                                target = Transaction(map[j][i].coins, map[j + 1][i].coins);
                             }
 
                             //ищем слева
                             if (i - 1 >= 0 && map[j][i - 1] != null)
                             {
-                                var x = i - 1;
-                                map[j][x].coins = AddBalance(map[j][x].coins, map[y][i].coins);
-                                map[j][i].coins = SubBalance(map[j][i].coins, map[y][i].coins);
+                                target = Transaction(map[j][i].coins, map[j][i - 1].coins);
                             }
+                            map[j][i].coins = target;
 
                         }
                     }
 
-                }   
-
-                var country_for_check = new List<Country>();
-
-                foreach (var country in countrycase)
-                {
-                    Country _country = new Country(country.name);
-                    country_for_check.Add(_country);
                 }
-
+                day++;
                 //check
-                for (int j = 0; j < mapsize; j++)
+                var countryChecked = 0;
+                foreach (var country in cs)
                 {
-                    for (int i = 0; i < mapsize; i++)
+                    if (IsCountryResolved(country))
                     {
-                        if (map[j][i] != null)
+                        countryChecked++;
+                        if(country.days == 0)
                         {
-                            foreach (var coin in map[j][i].coins)
-                            {
-                                if (coin != null && coin.balance == 0)
-                                {
-                                   foreach(var countrycheck in country_for_check)
-                                    {
-                                        if(countrycheck.name == coin.name)
-                                        {
-                                            countrycheck.check = false;
-                                        }
-                                    }
-                                }
-                            }
+                            country.days = day;
                         }
                     }
+
                 }
+                resolve = countryChecked == cs.Count ? true : false;
+               
+                
             }
-            Console.WriteLine(day);
+            foreach (var country in cs)
+            {
+                Console.WriteLine(country.name + " days = " + country.days);
+            }
+           
+            Console.ReadKey();
+            day = 0;
         }
 
-
-        public List<Coin> AddBalance(List<Coin> tocities, List<Coin> fromcities)
+        public bool IsCountryResolved(Country country)
         {
-            var targetCity = new List<Coin>();
-            foreach (var cityto in tocities)
+
+            for (var j = country.yh; j < country.yl + 1; j++)
             {
-                foreach (var cityfrom in fromcities)
+                for (var i = country.xl; i < country.xh + 1; i++)
                 {
-                    if (cityto.name == cityfrom.name)
+                    foreach (var coin in map[j][i].coins)
                     {
-                        cityto.balance = cityto.balance + cityfrom.balance;
-                        targetCity.Add(cityto);
+                        if (coin.balance <= 0)
+                            return false;
                     }
                 }
             }
-            return targetCity;
+            return true;
         }
 
-        public List<Coin> SubBalance(List<Coin> tocities, List<Coin> fromcities)
+        public List<Coin> Transaction(List<Coin> from, List<Coin> to)
         {
-            var targetCity = new List<Coin>();
-            foreach (var cityto in tocities)
+            var _from = AddBalance(from, to);
+            _from = SubBalance(from, to);
+            
+            return _from;
+        }
+        
+        public List<Coin> AddBalance(List<Coin> from, List<Coin> to)
+        {
+            foreach (var cityfrom in from)
             {
-                foreach (var cityfrom in fromcities)
+                foreach (var cityto in to)
                 {
                     if (cityto.name == cityfrom.name)
                     {
-                        cityto.balance = cityto.balance - cityfrom.balance;
-                        targetCity.Add(cityto);
+                        cityto.balance += cityfrom.balance / PORTION;
+                        //Console.WriteLine(cityto.name + " " + cityto.balance);
                     }
                 }
             }
-            return targetCity;
+            return from;
+        }
+
+        public List<Coin> SubBalance(List<Coin> from, List<Coin> to)
+        {
+            foreach (var cityfrom in from)
+            {
+                foreach (var cityto in to)
+                {
+                    if (cityto.name == cityfrom.name)
+                    {
+                        cityfrom.balance -= cityfrom.balance / PORTION;
+                    }
+                }
+            }
+            return from;
         }
 
         public void InitMap()
@@ -192,6 +198,7 @@ namespace Coins_def
                 map.Add(mapline);
             }
         }
+
         public void ResetMap()
         {
             for (int i = 0; i < mapsize; i++)
@@ -202,21 +209,24 @@ namespace Coins_def
                 }
             }
         }
+
         public void FillMap(List<Country> countries)
         {
-
+            var citycount = 0;
             foreach (var country in countries)
             {
                 for (var j = country.yh; j < country.yl + 1; j++)
                 {
                     for (var i = country.xl; i < country.xh + 1; i++)
                     {
-                        var _city = new City(){
+                        var _city = new City()
+                        {
                             country_name = country.name
                         };
                         foreach (var con in countries)
                         {
-                            var coin = new Coin() {
+                            var coin = new Coin()
+                            {
                                 name = country.name
                             };
                             if (con == country)
@@ -225,14 +235,21 @@ namespace Coins_def
                                 _city.coins.Add(coin);
                             }
                             else
+                            {
+                                coin.name = con.name;
+                                coin.balance = 0;
                                 _city.coins.Add(coin);
+                            }
                         }
-
+                        citycount++;
                         map[j][i] = _city;
                     }
+                    
                 }
-                PrittyPrint();
+                Console.WriteLine(country.name + " - " + citycount + " cities");
+                citycount = 0;
             }
+            PrittyPrint();
         }
 
         public void PrittyPrint()
@@ -251,6 +268,7 @@ namespace Coins_def
             Console.Write("\n");
             Console.Write("\n");
         }
+
         public class Map : List<CityList> { }
 
         public class CityList : List<City> { }

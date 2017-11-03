@@ -26,5 +26,8 @@ namespace Coins_def
         public int xh { get; set; }
         public int yh { get; set; }
         public int testcase { get; set; }
+        public bool resolved { get; set; }
+        public int days { get; set; }
+        public int citycount { get; set; }
     }
 }
