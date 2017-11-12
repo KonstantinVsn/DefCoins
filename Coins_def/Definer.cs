@@ -10,7 +10,8 @@ namespace Coins_def
     {
         public List<Country> countries = new List<Country>();
         public List<Country> resolvedCountries = new List<Country>();
-        int testcase = 0;
+        public CountryGroupe<int, List<Country>> CountryGroups = new CountryGroupe<int, List<Country>>();
+        int group = 0;
         Map map = new Map();
         int mapsize = 10;
 
@@ -22,39 +23,55 @@ namespace Coins_def
             foreach (var line in inputData)
             {
                 var parsedCity = line.Split(' ');
+
                 if (parsedCity.Length > 1)
                 {
-                    var country = new Country(parsedCity[0], xl: Int32.Parse(parsedCity[1]), yl: mapsize - 1 - Int32.Parse(parsedCity[2]),
-                       xh: Int32.Parse(parsedCity[3]), yh: mapsize - 1 - Int32.Parse(parsedCity[4]))
-                    {
-                        testcase = testcase
-                    };
+                    var country = new Country(parsedCity[0],
+                                              xl: Int32.Parse(parsedCity[1]),
+                                              yl: mapsize - 1 - Int32.Parse(parsedCity[2]),
+                                              xh: Int32.Parse(parsedCity[3]), yh: mapsize - 1 - Int32.Parse(parsedCity[4]));
                     countries.Add(country);
                 }
                 else
                 {
-                    testcase++;
+                    if (group != 0)
+                        CountryGroups.Add(group, countries);
+                    group++;
+                    countries = new List<Country>();
                 }
             }
-            for (var i = 0; i < testcase; i++)
+            CountryGroups.Add(group, countries);
+            List<Country> countryToCheck = new List<Country>();
+            var ZeroDayCountry = new Country();
+            foreach (var group in CountryGroups)
             {
-                ResetMap();
-                List<Country> countrycase = new List<Country>();
-                foreach (var country in countries)
+                FillMap(group.Item2, false);
+                foreach (var country in group.Item2)
                 {
-                    if (country.testcase == i + 1)
+                    if (CheckIsNeighbors(country))
                     {
-                        countrycase.Add(country);
+                        countryToCheck.Add(country);
+                    }
+                    else
+                    {
+                        ZeroDayCountry.name = country.name;
                     }
                 }
-                FillMap(countrycase);
-                if (countrycase.Count > 1)
-                    ShareCoins(countrycase);
+                ResetMap();
+                Console.Write("\n=============================CASE===================================\n");
+                if (countryToCheck.Count > 1)
+                {
+                    FillMap(countryToCheck, true);
+                    ShareCoins(countryToCheck);
+                    countryToCheck = new List<Country>();
+                    ResetMap();
+                }
                 else
                 {
-                    Console.WriteLine("days = " + 0);
+                    Console.WriteLine(ZeroDayCountry.name + " days = " + 0);
+                    countryToCheck = new List<Country>();
+                    ResetMap();
                 }
-                Console.Write("\n================================================================\n");
             }
         }
 
@@ -109,7 +126,7 @@ namespace Coins_def
                     if (IsCountryResolved(country))
                     {
                         countryChecked++;
-                        if(country.days == 0)
+                        if (country.days == 0)
                         {
                             country.days = day;
                         }
@@ -117,15 +134,15 @@ namespace Coins_def
 
                 }
                 resolve = countryChecked == cs.Count ? true : false;
-               
-                
+
+
             }
             foreach (var country in cs)
             {
                 Console.WriteLine(country.name + " days = " + country.days);
             }
-           
-           
+
+
             day = 0;
         }
 
@@ -150,10 +167,16 @@ namespace Coins_def
         {
             var _from = AddBalance(from, to);
             _from = SubBalance(from, to);
-            
+
             return _from;
         }
-        
+
+        //share coins of same countries to each other like:
+        // cityfrom                   cityto 
+        //        france coin      →        france coin
+        //        spanish coin      →        spanish con
+        //
+        //        NOT spanish coin  →     france coin
         public List<Coin> AddBalance(List<Coin> from, List<Coin> to)
         {
             foreach (var cityfrom in from)
@@ -163,7 +186,6 @@ namespace Coins_def
                     if (cityto.name == cityfrom.name)
                     {
                         cityto.balance += cityfrom.balance / PORTION;
-                        //Console.WriteLine(cityto.name + " " + cityto.balance);
                     }
                 }
             }
@@ -183,6 +205,33 @@ namespace Coins_def
                 }
             }
             return from;
+        }
+
+        public bool CheckIsNeighbors(Country country)
+        {
+            for (var j = country.yh; j < country.yl + 1; j++)
+            {
+                for (var i = country.xl; i < country.xh + 1; i++)
+                {
+                    if (map[j - 1][i] != null && map[j - 1][i].country_name != country.name)
+                    {
+                        return true;
+                    }
+                    if (map[j + 1][i] != null && map[j + 1][i].country_name != country.name)
+                    {
+                        return true;
+                    }
+                    if (map[j][i - 1] != null && map[j][i - 1].country_name != country.name)
+                    {
+                        return true;
+                    }
+                    if (map[j][i + 1] != null && map[j][i + 1].country_name != country.name)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public void InitMap()
@@ -210,7 +259,7 @@ namespace Coins_def
             }
         }
 
-        public void FillMap(List<Country> countries)
+        public void FillMap(List<Country> countries, bool print)
         {
             var citycount = 0;
             foreach (var country in countries)
@@ -244,17 +293,22 @@ namespace Coins_def
                         citycount++;
                         map[j][i] = _city;
                     }
-                    
+
                 }
-                Console.WriteLine(country.name + " - " + citycount + " cities");
+                if (print)
+                {
+                    Console.WriteLine(country.name + " - " + citycount + " cities");
+                }
+
                 citycount = 0;
             }
-            PrittyPrint();
+            if (print)
+                PrittyPrint();
         }
 
         public void PrittyPrint()
         {
-
+            Console.WriteLine('\n');
             Console.OutputEncoding = Encoding.UTF8;
             for (var j = 0; j < map.Count; j++)
             {
@@ -266,11 +320,18 @@ namespace Coins_def
                 Console.Write("\n");
             }
             Console.Write("\n");
-            Console.Write("\n");
         }
 
         public class Map : List<CityList> { }
 
         public class CityList : List<City> { }
+
+        public class CountryGroupe<T1, T2> : List<Tuple<T1, T2>>
+        {
+            public void Add(T1 item, T2 item2)
+            {
+                Add(new Tuple<T1, T2>(item, item2));
+            }
+        }
     }
 }

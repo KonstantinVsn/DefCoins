@@ -16,6 +16,7 @@ namespace Coins_def
             this.xh = xh;
             this.yh = yh;
         }
+        public Country() { }
         public Country(string name)
         {
             this.name = name;
@@ -25,7 +26,7 @@ namespace Coins_def
         public int yl { get; set; }
         public int xh { get; set; }
         public int yh { get; set; }
-        public int testcase { get; set; }
+        //public int countryGroup { get; set; }
         public bool resolved { get; set; }
         public int days { get; set; }
         public int citycount { get; set; }
